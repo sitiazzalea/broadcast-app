@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="WARN" name="SplitLoggingConfig">
+    <Appenders>
+        <!-- Console Appender -->
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} %-5level [%t] %logger{36} - %msg%n"/>
+        </Console>
+
+        <!-- Info Level File Appender -->
+        <File name="InfoFile" fileName="logs/app-info.log">
+            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} %-5level [%t] %logger{36} - %msg%n"/>
+        </File>
+
+        <!-- Error Level File Appender -->
+        <File name="ErrorFile" fileName="logs/app-error.log">
+            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} %-5level [%t] %logger{36} - %msg%n"/>
+        </File>
+
+        <!-- Error Level File Appender -->
+        <File name="DebugFile" fileName="logs/app-debug.log">
+            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} %-5level [%t] %logger{36} - %msg%n"/>
+        </File>
+    </Appenders>
+    <Loggers>
+        <!-- Root Logger -->
+        <Root level="info">
+            <AppenderRef ref="Console"/>
+            <AppenderRef ref="InfoFile" level="info"/>
+            <AppenderRef ref="ErrorFile" level="error"/>
+            <AppenderRef ref="DebugFile" level="debug"/>
+        </Root>
+    </Loggers>
+</Configuration>
