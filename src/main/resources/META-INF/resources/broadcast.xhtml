@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:p="http://primefaces.org/ui">
+
+<h:head>
+    <title>Message Broadcasting</title>
+
+    <style type="text/css">
+        * {
+            box-sizing: border-box;
+        }
+
+        html, body {
+            margin: 0;
+            padding: 0;
+            min-height: 100%;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI",
+                         Roboto, Arial, sans-serif;
+            background: #f4f6f9;
+            color: #172033;
+        }
+
+        body {
+            padding: 28px;
+        }
+
+        .app-shell {
+            max-width: 1280px;
+            margin: 0 auto;
+        }
+
+        .page-header {
+            margin-bottom: 24px;
+        }
+
+        .page-header h1 {
+            margin: 0;
+            font-size: 28px;
+            font-weight: 700;
+        }
+
+        .page-header p {
+            margin: 7px 0 0;
+            color: #64748b;
+            font-size: 14px;
+        }
+
+        .layout {
+            display: grid;
+            grid-template-columns: minmax(330px, .85fr) minmax(520px, 1.55fr);
+            gap: 22px;
+            align-items: start;
+        }
+
+        .panel {
+            background: #fff;
+            border: 1px solid #e2e8f0;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(15, 23, 42, .07);
+            overflow: hidden;
+        }
+
+        .panel-header {
+            padding: 20px 22px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .panel-header h2 {
+            margin: 0;
+            font-size: 18px;
+        }
+
+        .panel-header p {
+            margin: 5px 0 0;
+            color: #64748b;
+            font-size: 13px;
+        }
+
+        .panel-body {
+            padding: 22px;
+        }
+
+        .field {
+            margin-bottom: 20px;
+        }
+
+        .field-label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 13px;
+            font-weight: 650;
+        }
+
+        .required {
+            color: #b91c1c;
+        }
+
+        .broadcast-message {
+            width: 100%;
+            min-height: 180px;
+            resize: vertical;
+        }
+
+        .submit-button {
+            width: 100%;
+        }
+
+        .mockup-note {
+            margin-top: 18px;
+            padding: 12px 13px;
+            border: 1px solid #bfdbfe;
+            background: #eff6ff;
+            border-radius: 8px;
+            color: #1e40af;
+            font-size: 12px;
+            line-height: 1.5;
+        }
+
+        .status-summary {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 18px;
+        }
+
+        .summary-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            border: 1px solid #e2e8f0;
+            border-radius: 999px;
+            padding: 6px 10px;
+            background: #f8fafc;
+            font-size: 12px;
+        }
+
+        .summary-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: currentColor;
+        }
+
+        .session-id {
+            font-family: Consolas, Menlo, monospace;
+            font-size: 12px;
+            word-break: break-all;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 5px 9px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 650;
+        }
+
+        .status-accepted {
+            color: #0369a1;
+            background: #e0f2fe;
+        }
+
+        .status-sending {
+            color: #b45309;
+            background: #fef3c7;
+        }
+
+        .status-success {
+            color: #15803d;
+            background: #dcfce7;
+        }
+
+        .status-failed {
+            color: #b91c1c;
+            background: #fee2e2;
+        }
+
+        .polling-indicator {
+            color: #0369a1;
+            font-size: 12px;
+        }
+
+        @media (max-width: 900px) {
+            body {
+                padding: 18px;
+            }
+
+            .layout {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 520px) {
+            .page-header h1 {
+                font-size: 23px;
+            }
+
+            .panel-header,
+            .panel-body {
+                padding: 18px;
+            }
+        }
+    </style>
+
+</h:head>
+
+<h:body>
+
+<h:form id="broadcastForm">
+
+    <div class="app-shell">
+
+        <div class="page-header">
+            <h1>Message Broadcasting</h1>
+            <p>
+                Broadcast a message to customers by age category and monitor
+                submitted sessions.
+            </p>
+        </div>
+
+        <p:messages id="messages"
+                    closable="true"
+                    showDetail="true"/>
+
+        <div class="layout">
+
+            <section class="panel">
+
+                <div class="panel-header">
+                    <h2>Send Message</h2>
+                    <p>
+                        Define the target customer group and message content.
+                    </p>
+                </div>
+
+                <div class="panel-body">
+
+                    <div class="field">
+
+                        <h:outputLabel
+                                for="ageCategory"
+                                value="Age Category"
+                                styleClass="field-label"/>
+
+                        <span class="required">*</span>
+
+                        <p:selectOneMenu
+                                id="ageCategory"
+                                value="#{broadcastPageBean.ageCategory}"
+                                style="width:100%;">
+
+                            <f:selectItem
+                                    itemLabel="Select an age category"
+                                    itemValue="#{null}"
+                                    noSelectionOption="true"/>
+
+                            <f:selectItems
+                                    value="#{broadcastPageBean.ageCategories}"
+                                    var="category"
+                                    itemLabel="#{category}"
+                                    itemValue="#{category}"/>
+
+                        </p:selectOneMenu>
+
+                    </div>
+
+                    <div class="field">
+
+                        <h:outputLabel
+                                for="message"
+                                value="Message"
+                                styleClass="field-label"/>
+
+                        <span class="required">*</span>
+
+                        <p:inputTextarea
+                                id="message"
+                                value="#{broadcastPageBean.message}"
+                                rows="8"
+                                autoResize="false"
+                                styleClass="broadcast-message"
+                                placeholder="Type the message you want to broadcast..."/>
+
+                    </div>
+
+                    <div class="field">
+
+                        <p:commandButton
+                                id="submitButton"
+                                widgetVar="submitButtonWidget"
+                                value="Submit Broadcast"
+                                icon="pi pi-send"
+                                styleClass="submit-button"
+                                action="#{broadcastPageBean.submitBroadcast()}"
+                                process="@this ageCategory message"
+                                update="messages ageCategory message sessionPanel"
+                                onclick="PF('submitButtonWidget').disable();"
+                                oncomplete="PF('submitButtonWidget').enable();"/>
+
+                    </div>
+
+                    <div class="mockup-note">
+                        <strong>Asynchronous flow:</strong>
+                        the backend returns a session ID immediately.
+                        AJAX polling checks only active sessions, while
+                        completed sessions remain visible in the table.
+                    </div>
+
+                </div>
+
+            </section>
+
+            <section class="panel">
+
+                <div class="panel-header">
+                    <h2>Session Status</h2>
+                    <p>
+                        Submitted broadcast sessions and their current status.
+                    </p>
+                </div>
+
+                <div class="panel-body">
+
+                    <h:panelGroup id="sessionPanel">
+
+                        <div class="status-summary">
+
+                            <span class="summary-chip" style="color:#0369a1;">
+                                <span class="summary-dot"></span>
+                                Accepted: #{broadcastPageBean.acceptedCount}
+                            </span>
+
+                            <span class="summary-chip" style="color:#b45309;">
+                                <span class="summary-dot"></span>
+                                Sending: #{broadcastPageBean.sendingCount}
+                            </span>
+
+                            <span class="summary-chip" style="color:#15803d;">
+                                <span class="summary-dot"></span>
+                                Success: #{broadcastPageBean.successCount}
+                            </span>
+
+                            <span class="summary-chip" style="color:#b91c1c;">
+                                <span class="summary-dot"></span>
+                                Failed: #{broadcastPageBean.failedCount}
+                            </span>
+
+                        </div>
+
+                        <p:dataTable
+                                id="sessionTable"
+                                value="#{broadcastPageBean.sessions}"
+                                var="sessionRow"
+                                responsiveLayout="scroll"
+                                emptyMessage="">
+
+                            <p:column headerText="Session ID"
+                                      style="width:46%;">
+                                <h:outputText
+                                        value="#{sessionRow.sessionId}"
+                                        styleClass="session-id"/>
+                            </p:column>
+
+                            <p:column headerText="Status"
+                                      style="width:30%;">
+                                <h:outputText
+                                        value="#{broadcastPageBean.getStatusLabel(sessionRow.status)}"
+                                        styleClass="status-badge #{broadcastPageBean.getStatusStyleClass(sessionRow.status)}"/>
+                            </p:column>
+
+                            <p:column headerText="Time"
+                                      style="width:24%;">
+                                <h:outputText value="#{sessionRow.time}"/>
+                            </p:column>
+
+                            <f:facet name="empty">
+                                <div style="text-align:center;
+                                            padding:30px 15px;
+                                            color:#64748b;">
+                                    No broadcast sessions yet.
+                                </div>
+                            </f:facet>
+
+                        </p:dataTable>
+
+                        <div style="margin-top:14px;">
+                            <span class="polling-indicator">
+                                ● AJAX polling every 1 second for active sessions
+                            </span>
+                        </div>
+
+                    </h:panelGroup>
+
+                </div>
+            </section>
+
+        </div>
+    </div>
+
+    <!--
+        Every second:
+          1. JSF invokes pollSessionStatus().
+          2. The bean collects only local sessions with status 1/2.
+          3. It calls /api/poll_session_status.
+          4. The session panel is updated by AJAX.
+
+        process="@this" prevents form fields from being submitted on every poll.
+    -->
+    <p:poll
+            id="sessionPoll"
+            interval="1"
+            process="@this"
+            update="sessionPanel"
+            listener="#{broadcastPageBean.pollSessionStatus()}"
+            autoStart="true"/>
+
+</h:form>
+
+</h:body>
+</html>
