@@ -28,19 +28,18 @@ public class BroadcastAsyncService {
     ) {
         try {
             List<Customer> customers = customerService.findCustomers(category);
+            log.debug("ADHOC: Going to broadcast message '{}' to {} customers of category {} ", message, customers.size(), category);
 
             sessionStatusStore.put(sessionId, SessionStatus.SENDING);
             log.debug("ADHOC: BroadcastAsyncService: session_id: {} status: {}", sessionId, SessionStatus.SENDING);
 
-
-            // TODO:
             // whatsappService.send(message, customers);
             int result = whatsAppClient.sendBroadcast(
                     message,
                     customers
             );
             sessionStatusStore.put(sessionId, result);
-            log.debug("ADHOC: AFTER CALL WHATSAPP API: session_id: {} status: {}", sessionId, result);
+            log.debug("ADHOC: AFTER CALL WHATSAPP API: session_id: {}, status: {}", sessionId, result);
 
         } catch (Exception e) {
             sessionStatusStore.put(sessionId, SessionStatus.FAILED);
