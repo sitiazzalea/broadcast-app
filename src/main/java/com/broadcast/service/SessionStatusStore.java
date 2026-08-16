@@ -15,7 +15,7 @@ public class SessionStatusStore {
 
     public void put(String sessionId, int status) {
         statuses.put(sessionId, status);
-        log.debug("ADHOC: session_id: {} status: {}, session count is {}", sessionId, status, statuses.size());
+        log.debug("ADHOC: session_id: {}, status: {}, session count is {}", sessionId, status, statuses.size());
     }
 
     public Integer get(String sessionId) {

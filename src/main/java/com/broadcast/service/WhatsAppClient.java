@@ -28,7 +28,7 @@ public class WhatsAppClient {
 
         int randomValue = ThreadLocalRandom.current().nextInt(100);
 
-        if (randomValue < 75) {
+        if (randomValue < 90) {
             return SessionStatus.SUCCESS;
         }
 

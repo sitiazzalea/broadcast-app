@@ -118,6 +118,15 @@
             line-height: 1.5;
         }
 
+        .session-table .ui-datatable-scrollable-body {
+            overflow-y: auto;
+        }
+
+        .session-table .ui-datatable-data > tr > td {
+            height: 38px;
+            padding: 7px 12px;
+        }
+
         .status-summary {
             display: flex;
             gap: 10px;
@@ -208,215 +217,201 @@
 
 <h:body>
 
-<h:form id="broadcastForm">
+    <h:form id="broadcastForm">
 
-    <div class="app-shell">
+        <div class="app-shell">
 
-        <div class="page-header">
-            <h1>Message Broadcasting</h1>
-            <p>
-                Broadcast a message to customers by age category and monitor
-                submitted sessions.
-            </p>
-        </div>
+            <div class="page-header">
+                <h1>Message Broadcasting</h1>
+                <p>
+                    Broadcast a message to customers by age category and monitor
+                    submitted sessions.
+                </p>
+            </div>
 
-        <p:messages id="messages"
-                    closable="true"
-                    showDetail="true"/>
+            <p:messages id="messages"
+                        closable="true"
+                        showDetail="true"/>
 
-        <div class="layout">
+            <div class="layout">
 
-            <section class="panel">
+                <section class="panel">
 
-                <div class="panel-header">
-                    <h2>Send Message</h2>
-                    <p>
-                        Define the target customer group and message content.
-                    </p>
-                </div>
+                    <div class="panel-header">
+                        <h2>Send Message</h2>
+                        <p>
+                            Define the target customer group and message content.
+                        </p>
+                    </div>
 
-                <div class="panel-body">
+                    <div class="panel-body">
 
-                    <div class="field">
+                        <div class="field">
 
-                        <h:outputLabel
-                                for="ageCategory"
-                                value="Age Category"
-                                styleClass="field-label"/>
+                            <h:outputLabel
+                                    for="ageCategory"
+                                    value="Age Category"
+                                    styleClass="field-label"/>
 
-                        <span class="required">*</span>
+                            <span class="required">*</span>
 
-                        <p:selectOneMenu
-                                id="ageCategory"
-                                value="#{broadcastPageBean.ageCategory}"
-                                style="width:100%;">
+                            <p:selectOneMenu
+                                    id="ageCategory"
+                                    value="#{broadcastPageBean.ageCategory}"
+                                    style="width:100%;">
 
-                            <f:selectItem
-                                    itemLabel="Select an age category"
-                                    itemValue="#{null}"
-                                    noSelectionOption="true"/>
+                                <f:selectItem
+                                        itemLabel="Select an age category"
+                                        itemValue="#{null}"
+                                        noSelectionOption="true"/>
 
-                            <f:selectItems
-                                    value="#{broadcastPageBean.ageCategories}"
-                                    var="category"
-                                    itemLabel="#{category}"
-                                    itemValue="#{category}"/>
+                                <f:selectItems
+                                        value="#{broadcastPageBean.ageCategories}"
+                                        var="category"
+                                        itemLabel="#{category}"
+                                        itemValue="#{category}"/>
 
-                        </p:selectOneMenu>
+                            </p:selectOneMenu>
+
+                        </div>
+
+                        <div class="field">
+
+                            <h:outputLabel
+                                    for="message"
+                                    value="Message"
+                                    styleClass="field-label"/>
+
+                            <span class="required">*</span>
+
+                            <p:inputTextarea
+                                    id="message"
+                                    value="#{broadcastPageBean.message}"
+                                    rows="8"
+                                    autoResize="false"
+                                    styleClass="broadcast-message"
+                                    placeholder="Type the message you want to broadcast..."/>
+
+                        </div>
+
+                        <div class="field">
+
+                            <p:commandButton
+                                    id="submitButton"
+                                    widgetVar="submitButtonWidget"
+                                    value="Submit Broadcast"
+                                    icon="pi pi-send"
+                                    styleClass="submit-button"
+                                    action="#{broadcastPageBean.submitBroadcast()}"
+                                    process="@this ageCategory message"
+                                    update="messages ageCategory message sessionPanel"
+                                    onclick="PF('submitButtonWidget').disable();"
+                                    oncomplete="PF('submitButtonWidget').enable();"/>
+
+                        </div>
 
                     </div>
 
-                    <div class="field">
+                </section>
 
-                        <h:outputLabel
-                                for="message"
-                                value="Message"
-                                styleClass="field-label"/>
+                <section class="panel">
 
-                        <span class="required">*</span>
-
-                        <p:inputTextarea
-                                id="message"
-                                value="#{broadcastPageBean.message}"
-                                rows="8"
-                                autoResize="false"
-                                styleClass="broadcast-message"
-                                placeholder="Type the message you want to broadcast..."/>
-
+                    <div class="panel-header">
+                        <h2>Session Status</h2>
+                        <p>
+                            Submitted broadcast sessions and their current status.
+                        </p>
                     </div>
 
-                    <div class="field">
+                    <div class="panel-body">
 
-                        <p:commandButton
-                                id="submitButton"
-                                widgetVar="submitButtonWidget"
-                                value="Submit Broadcast"
-                                icon="pi pi-send"
-                                styleClass="submit-button"
-                                action="#{broadcastPageBean.submitBroadcast()}"
-                                process="@this ageCategory message"
-                                update="messages ageCategory message sessionPanel"
-                                onclick="PF('submitButtonWidget').disable();"
-                                oncomplete="PF('submitButtonWidget').enable();"/>
+                        <h:panelGroup id="sessionPanel">
 
-                    </div>
-
-                    <div class="mockup-note">
-                        <strong>Asynchronous flow:</strong>
-                        the backend returns a session ID immediately.
-                        AJAX polling checks only active sessions, while
-                        completed sessions remain visible in the table.
-                    </div>
-
-                </div>
-
-            </section>
-
-            <section class="panel">
-
-                <div class="panel-header">
-                    <h2>Session Status</h2>
-                    <p>
-                        Submitted broadcast sessions and their current status.
-                    </p>
-                </div>
-
-                <div class="panel-body">
-
-                    <h:panelGroup id="sessionPanel">
-
-                        <div class="status-summary">
+                            <div class="status-summary">
 
                             <span class="summary-chip" style="color:#0369a1;">
                                 <span class="summary-dot"></span>
                                 Accepted: #{broadcastPageBean.acceptedCount}
                             </span>
 
-                            <span class="summary-chip" style="color:#b45309;">
+                                <span class="summary-chip" style="color:#b45309;">
                                 <span class="summary-dot"></span>
                                 Sending: #{broadcastPageBean.sendingCount}
                             </span>
 
-                            <span class="summary-chip" style="color:#15803d;">
+                                <span class="summary-chip" style="color:#15803d;">
                                 <span class="summary-dot"></span>
                                 Success: #{broadcastPageBean.successCount}
                             </span>
 
-                            <span class="summary-chip" style="color:#b91c1c;">
+                                <span class="summary-chip" style="color:#b91c1c;">
                                 <span class="summary-dot"></span>
                                 Failed: #{broadcastPageBean.failedCount}
                             </span>
 
-                        </div>
+                            </div>
 
-                        <p:dataTable
-                                id="sessionTable"
-                                value="#{broadcastPageBean.sessions}"
-                                var="sessionRow"
-                                responsiveLayout="scroll"
-                                emptyMessage="">
+                            <p:dataTable
+                                    id="sessionTable"
+                                    value="#{broadcastPageBean.sessions}"
+                                    var="sessionRow"
+                                    scrollable="true"
+                                    scrollHeight="400"
+                                    responsiveLayout="scroll"
+                                    styleClass="session-table">
 
-                            <p:column headerText="Session ID"
-                                      style="width:46%;">
-                                <h:outputText
-                                        value="#{sessionRow.sessionId}"
-                                        styleClass="session-id"/>
-                            </p:column>
+                                <p:column headerText="Session ID"
+                                          style="width:46%;">
+                                    <h:outputText
+                                            value="#{sessionRow.sessionId}"
+                                            styleClass="session-id"/>
+                                </p:column>
 
-                            <p:column headerText="Status"
-                                      style="width:30%;">
-                                <h:outputText
-                                        value="#{broadcastPageBean.getStatusLabel(sessionRow.status)}"
-                                        styleClass="status-badge #{broadcastPageBean.getStatusStyleClass(sessionRow.status)}"/>
-                            </p:column>
+                                <p:column headerText="Status"
+                                          style="width:30%;">
+                                    <h:outputText
+                                            value="#{broadcastPageBean.getStatusLabel(sessionRow.status)}"
+                                            styleClass="status-badge #{broadcastPageBean.getStatusStyleClass(sessionRow.status)}"/>
+                                </p:column>
 
-                            <p:column headerText="Time"
-                                      style="width:24%;">
-                                <h:outputText value="#{sessionRow.time}"/>
-                            </p:column>
+                                <p:column headerText="Time"
+                                          style="width:24%;">
+                                    <h:outputText value="#{sessionRow.time}"/>
+                                </p:column>
 
-                            <f:facet name="empty">
-                                <div style="text-align:center;
+                                <f:facet name="empty">
+                                    <div style="text-align:center;
                                             padding:30px 15px;
                                             color:#64748b;">
-                                    No broadcast sessions yet.
-                                </div>
-                            </f:facet>
+                                        No broadcast sessions yet.
+                                    </div>
+                                </f:facet>
 
-                        </p:dataTable>
+                            </p:dataTable>
 
-                        <div style="margin-top:14px;">
+                            <div style="margin-top:14px;">
                             <span class="polling-indicator">
                                 ● AJAX polling every 1 second for active sessions
                             </span>
-                        </div>
+                            </div>
 
-                    </h:panelGroup>
+                        </h:panelGroup>
 
-                </div>
-            </section>
+                    </div>
+                </section>
 
+            </div>
         </div>
-    </div>
+<!--        AJAX poll-->
+        <p:poll
+                id="sessionPoll"
+                interval="1"
+                process="@this"
+                update="sessionPanel"
+                listener="#{broadcastPageBean.pollSessionStatus()}"
+                autoStart="true"/>
 
-    <!--
-        Every second:
-          1. JSF invokes pollSessionStatus().
-          2. The bean collects only local sessions with status 1/2.
-          3. It calls /api/poll_session_status.
-          4. The session panel is updated by AJAX.
-
-        process="@this" prevents form fields from being submitted on every poll.
-    -->
-    <p:poll
-            id="sessionPoll"
-            interval="1"
-            process="@this"
-            update="sessionPanel"
-            listener="#{broadcastPageBean.pollSessionStatus()}"
-            autoStart="true"/>
-
-</h:form>
+    </h:form>
 
 </h:body>
 </html>
