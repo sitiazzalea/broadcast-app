@@ -11,8 +11,8 @@
     <groupId>com</groupId>
     <artifactId>broadcast</artifactId>
     <version>1.0.0</version>
-    <packaging>war</packaging>
-    <name>demo</name>
+    <packaging>jar</packaging>
+    <name>broadcast</name>
     <description>Broadcast Application Project</description>
     <properties>
         <java.version>8</java.version>
